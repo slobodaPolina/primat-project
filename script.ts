@@ -33,9 +33,7 @@ function findMin() { // find minimum of f(x)
         previous = next;
         lambda = countLambda(previous);
         next = previous - (grad(previous) * lambda);
-        console.log(
-            "Next vector is " + next + "." + "Value is " + f(next)
-        );
+        console.log("Next vector is " + next + "." + "Value is " + f(next));
     } while (Math.abs(f(previous) - f(next)) > ef && !similar(previous, next, eps1));
     let res = (previous + next) / 2.0;
     console.log(
@@ -65,9 +63,11 @@ function modeling(x : number) {
 // в каждый из 10 входит х, там будет вес,
 // получится 10 весов на первый скрытый слой + 10 * 10 весов на второй + 10 на финальный (внешний)
 
+var NODES = 10;
+
 var activation = (x : number) => 1 / (1 + Math.pow(Math.E, -x)); // сигмоида
 
-var weights = Array(10 + 10 * 10 + 10).fill(0);
+var weights = Array((NODES + 2) * NODES).fill(0);
 
 // x is the input. here we just normalize it (make it from 0 to 1)
 // границы х от -10 до +10
@@ -82,25 +82,25 @@ function secondNode(x : number, number : number) {
 // results is an array of 10 results of the second layer
 function thirdNode(results : number[], number : number) {
     var sum = 0;
-    results.forEach((index, result) => sum += result * weights[10 + number * 10 + index]);
+    results.forEach((index, result) => sum += result * weights[NODES + number * NODES + index]);
     return activation(sum);
 }
 
 // an external node (final one). Returns the prediction
 function externalNode(results : number[]) {
-    return thirdNode(results, 10);
+    return thirdNode(results, NODES);
 }
 
 // the main function
 function run(parameter : number) {
     let frt = firstNode(parameter);
     let seconds = [];
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < NODES; i++) {
         seconds.push(secondNode(frt, i));
     }
 
     let thirds = [];
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < NODES; i++) {
         thirds.push(thirdNode(seconds, i));
     }
 
