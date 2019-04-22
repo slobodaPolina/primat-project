@@ -34,7 +34,9 @@ function findMin() { // find minimum of f(x)
         lambda = countLambda(previous);
         next = previous - (grad(previous) * lambda);
         console.log("Next vector is " + next + "." + "Value is " + f(next));
-    } while (Math.abs(f(previous) - f(next)) > ef && !similar(previous, next, eps1));
+    } while (
+        Math.abs(f(previous) - f(next)) > ef && !similar(previous, next, eps1)
+    );
     let res = (previous + next) / 2.0;
     console.log(
         "----------The minimum is found at (" + res + ") and f is " + f(res)
@@ -47,9 +49,29 @@ function f(x : number) {
     return 0.5 * Math.pow((run(x) - modeling(x)), 2);
 }
 
-// градиент от f(x)
+// градиент от функции протерь
 function grad(x : number) {
-    return x;
+    // вектор частных производных для каждой связи между нейронами
+    let res = Array(NODES * (NODES + 2));
+    for(let k = 0; k < res.length; k++) {
+        // этот вес из нейрона i в j
+        let previous;
+        if (k < NODES) {
+            // перыдущий нейрон - начальный, ведет во второй слой
+            // выход начального нейрона
+            previous = firstNode(x);
+        } else if (k < NODES * (NODES + 1)) {
+            // ведет со второго на третьий слой
+            previous = secondNode(firstNode(x), Math.floor((k - NODES) / NODES));
+        } else {
+            // с третьего во внешний
+            let seconds = [];
+            for(let i = 0; i < NODES; i++) {
+                seconds.push(secondNode(firstNode(x), i));
+            }
+            previous = thirdNode(seconds, k - NODES * (NODES + 1));
+        }
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -61,7 +83,8 @@ function modeling(x : number) {
 // выходная вершина дает ответ
 // и допустим 2 скрытых слоя по 10 нейронов.
 // в каждый из 10 входит х, там будет вес,
-// получится 10 весов на первый скрытый слой + 10 * 10 весов на второй + 10 на финальный (внешний)
+// получится 10 весов на первый скрытый слой
+// + 10 * 10 весов на второй + 10 на финальный (внешний)
 
 var NODES = 10;
 
@@ -71,7 +94,7 @@ var weights = Array((NODES + 2) * NODES).fill(0);
 
 // x is the input. here we just normalize it (make it from 0 to 1)
 // границы х от -10 до +10
-var firstNode = (x : number) => (x + 10.0) / 20.0;
+var firstNode = (x : number): number => (x + 10.0) / 20.0;
 
 // x is normalized result of the first layer.
 // number is the number of the node in the row of the second nodes
@@ -82,7 +105,9 @@ function secondNode(x : number, number : number) {
 // results is an array of 10 results of the second layer
 function thirdNode(results : number[], number : number) {
     var sum = 0;
-    results.forEach((index, result) => sum += result * weights[NODES + number * NODES + index]);
+    results.forEach(
+        (index, result) => sum += result * weights[NODES + number * NODES + index]
+    );
     return activation(sum);
 }
 
