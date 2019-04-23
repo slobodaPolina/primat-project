@@ -87,12 +87,7 @@ function grad(x : number) {
     }
     let gradVector = Array(NODES * (NODES + 2)).fill(0);
     for (let i = 0; i < gradVector.length; i++) {
-        let destinationNumber = i < NODES ?
-            i + 1 :
-                i < (NODES + 1) * NODES ?
-                    NODES + 1 + Math.floor((i - NODES) / NODES) :
-                    i - (NODES * (NODES + 1)) + 2 * NODES + 1;
-        gradVector[i] = res[i] * mistakes[destinationNumber];
+        gradVector[i] = res[i] * mistakes[parseDestinationByWeightNumber(i)];
     }
     return gradVector;
 }
@@ -116,6 +111,53 @@ function countMistake(mistakes : number[], NodeNumber : number, x : number) {
         }
     }
     mistakes[NodeNumber] = result;
+}
+
+// меняет веса, prevDeltas, prevResult и nu на каждом этапе обучения
+function changeWeights (x : number, prevDeltas : number[], prevResult : number, nu : number) {
+    let p = 1; // коэффициент регуляризации
+    let mu = 1; // коэффициент момента
+    let newResult = runAll(x);
+    let delta = newResult - 1.01 * prevResult;
+    prevResult = newResult;
+    let gradVector = grad(x);
+    for(let i = 0; i < links.length; i++) {
+        for(let j = 0; j < links.length; j++) {
+            if(links[i][j] != undefined) {
+                prevDeltas[i][j] = nu * (gradVector[getWeightNumberByNodes(i, j)] + p * links[i][j]) + mu * prevDeltas[i][j];
+                links[i][j] -= prevDeltas[i][j];
+            }
+        }
+    }
+    nu = delta > 0 ? nu * 0.99 : nu * 1.01;
+}
+
+// получить номер узла, в который седет связь, по номеру связи
+function parseDestinationByWeightNumber(i : number) {
+    return i < NODES ?
+        i + 1 :
+            i < (NODES + 1) * NODES ?
+                NODES + 1 + Math.floor(i / NODES) :
+                NODES * (NODES + 2) - 1;
+}
+
+// получить номер вершины, из которой ведет связь
+function parseSourceByWeightNumber(i : number) {
+    return i < NODES ? // связь из 1 во 2 слой
+            0 :
+            i < (NODES + 1) * NODES ? // из 2 в 3
+                1 + (i % NODES) :
+                1 + NODES + (i % NODES); // из 3 в 4
+}
+
+function getWeightNumberByNodes(from : number, to : number) {
+    if (from === 0) { // 1 to 2
+        return to - 1;
+    } else if (from <= NODES) { // 2 to 3
+        return NODES + (to - 1 - NODES) * NODES + from - 1;
+    } else { // 3 to 4
+        return (NODES + 1) * NODES + (from - 1 - NODES);
+    }
 }
 
 // -----------------------------------------------------------------------
