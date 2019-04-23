@@ -154,14 +154,18 @@ function secondNode(x : number, number : number) {
 function thirdNode(results : number[], number : number) {
     var sum = 0;
     results.forEach(
-        (index, result) => sum += result * links[index][NODES + 1 + number]
+        (result, index) => sum += result * links[1 + index][NODES + 1 + number]
     );
     return activation(sum);
 }
 
 // an external node (final one). Returns the prediction
 function externalNode(results : number[]) {
-    return thirdNode(results, NODES);
+    var sum = 0;
+    results.forEach(
+        (result, index) => sum += result * links[1 + NODES + index][2 * NODES + 1]
+    );
+    return activation(sum);
 }
 
 
@@ -175,13 +179,17 @@ function secondNodeDer(x : number, number : number) {
 function thirdNodeDer(results : number[], number : number) {
     var sum = 0;
     results.forEach(
-        (index, result) => sum += result * links[index][NODES + 1 + number]
+        (result, index) => sum += result * links[1 + index][NODES + 1 + number]
     );
     return activationDerivate(sum);
 }
 
 function externalNodeDer(results : number[]) {
-    return thirdNodeDer(results, NODES);
+    var sum = 0;
+    results.forEach(
+        (result, index) => sum += result * links[1 + NODES + index][2 * NODES + 1]
+    );
+    return activationDerivate(sum);
 }
 
 function run12 (x : number) {
@@ -212,4 +220,18 @@ function runAll(x : number) {
     return result;
 }
 
+for(let i = 0; i < links.length; i++) {
+    for (let j = 0; j < links.length; j++) {
+        if ((i === 0 && j > 0 && j < NODES + 1) || // из 1 слоя во второй
+            // из второго в третий
+            (i > 0 && i < NODES + 1 && j >= NODES + 1 && j <= 2 * NODES) ||
+            // из третьего в четвертый
+            (i >= NODES + 1 && i <= 2 * NODES && j === 2 * NODES + 1)
+        ) {
+            links[i][j] = 0;
+        } else {
+            links[i][j] = undefined;
+        }
+    }
+}
 runAll(0);
