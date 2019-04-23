@@ -97,19 +97,22 @@ function grad(x : number) {
     return gradVector;
 }
 
+// ошибка нейрона номер NodeNumber при запуске сети на числе x
 function countMistake(mistakes : number[], NodeNumber : number, x : number) {
     let result = 0;
     if (NodeNumber >= NODES + 1) { // вершина 3 слоя
-        result = mistakes[2 * NODES + 1] * weights[(NODES + 1) * NODES + (NodeNumber - NODES - 1)] * thirdNodeDer(run12(x), (NodeNumber - NODES - 1));
+        result = mistakes[2 * NODES + 1] *
+            links[NodeNumber][2 * NODES + 1] *
+            thirdNodeDer(run12(x), (NodeNumber - NODES - 1));
     } else if(NodeNumber >= 1) { // вершина 2 слоя
         let der = secondNodeDer(firstNode(x), (NodeNumber - 1));
         for(let j = NODES + 1; j < (2 * NODES + 1); j++) { // бежим по 3 слою
-            result += der * mistakes[j] * weights[NODES + (NodeNumber - 1) + NODES * (j - NODES - 1)];
+            result += der * mistakes[j] * links[NodeNumber][j];
         }
     } else { // вершина 1 слоя (входная)
         let der = firstNodeDer(x);
         for(let j = 1; j < (NODES + 1); j++) { // бежим по 2 слою
-            result += der * mistakes[j] * weights[j];
+            result += der * mistakes[j] * links[NodeNumber][j];
         }
     }
     mistakes[NodeNumber] = result;
@@ -127,12 +130,14 @@ function modeling(x : number) {
 // получится 10 весов на первый скрытый слой
 // + 10 * 10 весов на второй + 10 на финальный (внешний)
 
-var NODES = 10;
+var NODES = 10; // количество вершин в каждом внутреннем слое
+var links = Array(NODES * 2 + 2); // двумерный массив связей между нейронами
+for (let i = 0; i < links.length; i++) {
+    links[i] = Array(NODES * 2 + 2);
+}
 
 var activation = (x : number) => 1 / (1 + Math.pow(Math.E, -x)); // сигмоида
 var activationDerivate = (x : number) => Math.pow(Math.E, -x) / Math.pow(Math.pow(Math.E, -x) + 1, 2);
-
-var weights = Array((NODES + 2) * NODES).fill(0);
 
 // x is the input. here we just normalize it (make it from 0 to 1)
 // границы х от -10 до +10
@@ -141,14 +146,15 @@ var firstNode = (x : number) => activation((x + 10.0) / 20.0);
 // x is normalized result of the first layer.
 // number is the number of the node in the row of the second nodes
 function secondNode(x : number, number : number) {
-    return activation(weights[number] * x);
+    return activation(links[0][number + 1] * x);
 }
 
 // results is an array of 10 results of the second layer
+//number is still number of the node of 3st layer
 function thirdNode(results : number[], number : number) {
     var sum = 0;
     results.forEach(
-        (index, result) => sum += result * weights[NODES + number * NODES + index]
+        (index, result) => sum += result * links[index][NODES + 1 + number]
     );
     return activation(sum);
 }
@@ -158,17 +164,18 @@ function externalNode(results : number[]) {
     return thirdNode(results, NODES);
 }
 
+
+// they return just derivates of the arguments given
 var firstNodeDer = (x : number) => activationDerivate((x + 10.0) / 20.0);
 
-// they return just derivates
 function secondNodeDer(x : number, number : number) {
-    return activationDerivate(weights[number] * x);
+    return activationDerivate(links[0][number + 1] * x);
 }
 
 function thirdNodeDer(results : number[], number : number) {
     var sum = 0;
     results.forEach(
-        (index, result) => sum += result * weights[NODES + number * NODES + index]
+        (index, result) => sum += result * links[index][NODES + 1 + number]
     );
     return activationDerivate(sum);
 }
@@ -204,3 +211,5 @@ function runAll(x : number) {
     );
     return result;
 }
+
+runAll(0);
