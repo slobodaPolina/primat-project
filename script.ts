@@ -17,16 +17,8 @@ var links = Array(length); // двумерный массив связей ме�
 for(let i = 0; i < length; i++) {
     links[i] = Array(length);
     for (let j = 0; j < length; j++) {
-        if ((getLayerOfNode(i) === 1 && getLayerOfNode(j) === 2) || // из 1 слоя во второй
-            // из второго в третий
-            (getLayerOfNode(i) === 2 && getLayerOfNode(j) === 3) ||
-            // из третьего в четвертый
-            (getLayerOfNode(i) === 3 && getLayerOfNode(j) === 4)
-        ) {
-            links[i][j] = 0;
-        } else {
-            links[i][j] = undefined;
-        }
+        links[i][j] = getLayerOfNode(j) - getLayerOfNode(i) === 1 ?
+            0 : undefined;
     }
 }
 
@@ -225,7 +217,7 @@ function runAll(x : number) {
 }
 
 let prevResult = 0;
-let x;
+let x: number;
 let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
 data.forEach(s => {
     x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
