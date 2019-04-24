@@ -78,7 +78,8 @@ function getLayerOfNode(NodeNumber : number) {
         NodeNumber > 0 && NodeNumber <= NODES ?
             2 :
             NodeNumber > NODES && NodeNumber <= 2 * NODES ?
-                3 : 4;
+                3 :
+                4;
 }
 
 // ошибка нейрона номер NodeNumber при запуске сети на числе x
@@ -99,7 +100,7 @@ function countMistake(mistakes : number[], NodeNumber : number, x : number) {
             result += der * mistakes[j] * links[NodeNumber][j];
         }
     } else {
-        console.log("ERROR, IMPOSSIBLE LAYER NUMBER");
+        console.error("IMPOSSIBLE LAYER NUMBER");
     }
     mistakes[NodeNumber] = result;
 }
@@ -118,7 +119,6 @@ function changeWeights (x : number, prevResult : number) {
     let delta = newResult - 1.01 * prevResult;
     prevResult = newResult;
     let gradVector = grad(x);
-    console.log(gradVector);
     for(let i = 0; i < length; i++) {
         for(let j = 0; j < length; j++) {
             if(links[i][j] != undefined) {
@@ -129,7 +129,15 @@ function changeWeights (x : number, prevResult : number) {
             }
         }
     }
-    console.log(prevDeltas);
+    console.log("Changing weights. Deltas of the weights are : ");
+    for(let i = 0; i < length; i++) {
+        for(let j = 0; j < length; j++) {
+            if(links[i][j] != undefined) {
+                console.log("minused " + prevDeltas[i][j] + " to " + links[i][j]);
+            }
+        }
+    }
+
     nu = delta > 0 ? nu * 0.99 : nu * 1.01;
     return prevResult;
 }
@@ -194,8 +202,8 @@ function externalNodeDer(results : number[]) {
 function run12 (x : number) {
     let frt = firstNode(x);
     let seconds = [];
-    for(let i = 0; i < NODES; i++) {
-        seconds.push(secondNode(frt, i + 1));
+    for(let i = 1; i < NODES + 1; i++) {
+        seconds.push(secondNode(frt, i));
     }
     return seconds;
 }
@@ -203,8 +211,8 @@ function run12 (x : number) {
 function run123 (x : number) {
     let seconds = run12(x);
     let thirds = [];
-    for(let i = 0; i < NODES; i++) {
-        thirds.push(thirdNode(seconds, i + NODES + 1));
+    for(let i = NODES + 1; i < length - 1; i++) {
+        thirds.push(thirdNode(seconds, i));
     }
     return thirds;
 }
@@ -213,20 +221,23 @@ function run123 (x : number) {
 function runAll(x : number) {
     let thirds = run123(x);
     let result = externalNode(thirds);
-    return result;
+    return result * 10; // тут надо обратно как-то вмасштабироваться, на выходе от 0 до 10
 }
 
 let prevResult = 0;
 let x: number;
-let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
+let data = [0, 0, 0, 0, 0];
+//let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
 data.forEach(s => {
     x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
     let result = runAll(x);
     let realValue = modeling(x);
     if (Math.abs(result - realValue) > 0.001) {
-        console.log("function of " + x + " returned " + result +
-            ". Thereas real value is " + realValue
-        );
+        console.log("function of " + x + " returned " + result);
+        console.log("mistake is " + Math.abs(result - realValue));
         prevResult = changeWeights(x, prevResult);
+    } else {
+        console.log("OK");
     }
+    console.log("-----------------------------------");
 });
