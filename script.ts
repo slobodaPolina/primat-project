@@ -1,13 +1,16 @@
 import * as fs from 'fs';
-const co = require('co');
-const generate = require('node-chartist');
-const ChartjsNode = require('chartjs-node');
 
+var abs_modeling = (x: number) => Math.log(1 + Math.pow(Math.E, x)); // моделируемая функция
 
 function modeling(x : number) { // идеальная активация нейрона на выходе
-    var f = (x: number) => Math.log(1 + Math.pow(Math.E, x));
     // Нормализуем идеальный результат, теперь он по идее должен стать идеальной степенью активации
-    return (f(x) - f(-10)) / (f(10.0) - f(-10));
+    return (abs_modeling(x) - abs_modeling(-10)) /
+                (abs_modeling(10.0) - abs_modeling(-10));
+ }
+
+// по значению уровня активации восстановит ответ в абсолютных цифрах
+ function renormalize(x: number) {
+     return ((abs_modeling(10.0) - abs_modeling(-10)) * x) + abs_modeling(-10)
  }
 
 // выходная вершина дает ответ
@@ -96,15 +99,6 @@ function changeWeights (x : number) {
     for(let i = 1; i < NODES + 1; i++) {
         links[0][i] += + n * deltas[i] * firstNode(x);
     }
-
-    /*console.log("Changing weights. Deltas of the weights are : ");
-    for(let i = 0; i < length; i++) {
-        for(let j = 0; j < length; j++) {
-            if(links[i][j] != undefined) {
-                console.log("minused " + prevDeltas[i][j] + " from " + links[i][j]);
-            }
-        }
-    }*/
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -193,15 +187,15 @@ function runAll(x : number) {
 
 let x: number;
 let data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // это я пока взяла для теста и отладки
-let mistakes = [];
+let mistakes = []; // ошибки возбужденности
 //let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
 data.forEach(s => {
     x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
     let result = runAll(x);
     let realValue = modeling(x);
     if (Math.abs(result - realValue) > 0.001) { // если сеть отвечает совсем не так, как надо, обучаем
-        console.log("function of " + x + " returned " + result);
-        console.log("mistake is " + Math.abs(result - realValue));
+        console.log("function of " + x + " returned " + renormalize(result));
+        console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
         mistakes.push(Math.abs(result - realValue));
         changeWeights(x);
     } else {
