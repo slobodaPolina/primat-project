@@ -1,7 +1,9 @@
 import * as fs from 'fs';
 
-function modeling(x : number) { // функция, которую моделируем
-    return Math.log(1 + Math.pow(Math.E, x));
+function modeling(x : number) { // идеальная активация нейрона на выходе
+    var f = (x: number) => Math.log(1 + Math.pow(Math.E, x));
+    // Нормализуем идеальный результат, теперь он по идее должен стать идеальной степенью активации
+    return (f(x) - f(-10)) / (f(10.0) - f(-10));
  }
 
 // выходная вершина дает ответ
@@ -23,7 +25,7 @@ for(let i = 0; i < length; i++) {
     }
 }
 
-var n = 0.5; // скорость обучения, нужно подбирать
+var n = 1; // скорость обучения, нужно подбирать
 
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
@@ -46,12 +48,16 @@ function changeWeights (x : number) {
     let result = runAll(x);
     let error = modeling(x) - result;
     deltas[length - 1] = activationDerivate(result) * error; // насколько изменить выходной результат
+    console.log(result);
+    console.log(activationDerivate(result));
+    console.log(deltas[length - 1]);
 
     // обработаем 3 слой
     for(let i = 1 + NODES; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
             deltas[i] = activationDerivate(thirdNode(run12(x), i)) *
                             deltas[length - 1] * links[i][length - 1];
+            console.log(deltas[i]);
         } else {
             console.error("NO WEIGHT BUT HAS TO BE");
         }
@@ -178,12 +184,11 @@ function run123 (x : number) { // запуск 1, 2 и 3 слоев
 function runAll(x : number) {
     let thirds = run123(x);
     let result = externalNode(thirds);
-    // финальный слой отдает результат активации, надо его как-то отмасштабировать
-    return result * 10;
+    return result;
 }
 
 let x: number;
-let data = [0, 0, 0, 0, 0]; // это я пока взяла для теста и отладки
+let data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // это я пока взяла для теста и отладки
 //let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
 data.forEach(s => {
     x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
