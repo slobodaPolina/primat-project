@@ -1,4 +1,8 @@
 import * as fs from 'fs';
+const co = require('co');
+const generate = require('node-chartist');
+const ChartjsNode = require('chartjs-node');
+
 
 function modeling(x : number) { // идеальная активация нейрона на выходе
     var f = (x: number) => Math.log(1 + Math.pow(Math.E, x));
@@ -189,6 +193,7 @@ function runAll(x : number) {
 
 let x: number;
 let data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // это я пока взяла для теста и отладки
+let mistakes = [];
 //let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
 data.forEach(s => {
     x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
@@ -197,9 +202,12 @@ data.forEach(s => {
     if (Math.abs(result - realValue) > 0.001) { // если сеть отвечает совсем не так, как надо, обучаем
         console.log("function of " + x + " returned " + result);
         console.log("mistake is " + Math.abs(result - realValue));
+        mistakes.push(Math.abs(result - realValue));
         changeWeights(x);
     } else {
         console.log("OK");
     }
     console.log("-----------------------------------");
 });
+
+// mistakes.forEach(mistake => console.log(mistake.toString().replace('.', ',')));
