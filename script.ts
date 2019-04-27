@@ -18,7 +18,7 @@ for(let i = 0; i < length; i++) {
     links[i] = Array(length);
     for (let j = 0; j < length; j++) {
         links[i][j] = getLayerOfNode(j) - getLayerOfNode(i) === 1 ?
-            0 : undefined;
+            Math.random() : undefined;
     }
 }
 
