@@ -33,7 +33,7 @@ for(let i = 0; i < length; i++) {
     }
 }
 
-var n = 1; // скорость обучения, нужно подбирать
+var n = 0.1; // скорость обучения, нужно подбирать
 
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
@@ -189,7 +189,7 @@ function runAll(x : number) {
 //let mistakes = []; // ошибки возбужденности
 let eps = 0.1;
 // let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
-let total = 10000;
+let total = 50000;
 for (let i = 0; i < total; i++) {
     if (i % (total / 100)  == 0) {
         console.log("learning " + ((i * 100) / total) + "% done");
