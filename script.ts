@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 
+// выдает значения от 0 до 10
 var abs_modeling = (x: number) => Math.log(1 + Math.pow(Math.E, x)); // моделируемая функция
 
-function modeling(x : number) { // идеальная активация нейрона на выходе
+function modeling(x : number) { // идеальная активация нейрона на выходе от 0 до 1
     // Нормализуем идеальный результат, теперь он по идее должен стать идеальной степенью активации
     return (abs_modeling(x) - abs_modeling(-10)) /
                 (abs_modeling(10.0) - abs_modeling(-10));
@@ -10,7 +11,7 @@ function modeling(x : number) { // идеальная активация ней�
 
 // по значению уровня активации восстановит ответ в абсолютных цифрах
  function renormalize(x: number) {
-     return ((abs_modeling(10.0) - abs_modeling(-10)) * x) + abs_modeling(-10)
+     return ((abs_modeling(10.0) - abs_modeling(-10)) * x) + abs_modeling(-10);
  }
 
 // выходная вершина дает ответ
@@ -19,7 +20,7 @@ function modeling(x : number) { // идеальная активация ней�
 // получится 10 весов на первый скрытый слой
 // + 10 * 10 весов на второй + 10 на финальный (внешний)
 
-var NODES = 10; // количество вершин в каждом внутреннем слое
+var NODES = 20; // количество вершин в каждом внутреннем слое
 var length = NODES * 2 + 2; // всего вершин. Начальная, конечная и 2 слоя между ними по NODES
 var links = Array(length); // двумерный массив связей между нейронами
 // изначально заполним весы нулями
@@ -55,16 +56,16 @@ function changeWeights (x : number) {
     let result = runAll(x);
     let error = modeling(x) - result;
     deltas[length - 1] = activationDerivate(result) * error; // насколько изменить выходной результат
-    console.log(result);
-    console.log(activationDerivate(result));
-    console.log(deltas[length - 1]);
+    //console.log(result);
+    //console.log(activationDerivate(result));
+    //console.log(deltas[length - 1]);
 
     // обработаем 3 слой
     for(let i = 1 + NODES; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
             deltas[i] = activationDerivate(thirdNode(run12(x), i)) *
                             deltas[length - 1] * links[i][length - 1];
-            console.log(deltas[i]);
+            //console.log(deltas[i]);
         } else {
             console.error("NO WEIGHT BUT HAS TO BE");
         }
@@ -185,23 +186,39 @@ function runAll(x : number) {
     return result;
 }
 
-let x: number;
-let data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // это я пока взяла для теста и отладки
-let mistakes = []; // ошибки возбужденности
-//let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
-data.forEach(s => {
-    x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
+//let mistakes = []; // ошибки возбужденности
+let eps = 0.1;
+// let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
+let total = 10000;
+for (let i = 0; i < total; i++) {
+    if (i % (total / 100)  == 0) {
+        console.log("learning " + ((i * 100) / total) + "% done");
+    }
+    let x = Math.random() * 20 - 10;
     let result = runAll(x);
     let realValue = modeling(x);
-    if (Math.abs(result - realValue) > 0.001) { // если сеть отвечает совсем не так, как надо, обучаем
-        console.log("function of " + x + " returned " + renormalize(result));
-        console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
-        mistakes.push(Math.abs(result - realValue));
+    if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
+        //console.log("function of " + x + " returned " + renormalize(result));
+        //console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
+        //mistakes.push(Math.abs(result - realValue));
         changeWeights(x);
     } else {
-        console.log("OK");
+        //console.log("OK");
     }
-    console.log("-----------------------------------");
-});
+    //console.log("-----------------------------------");
+};
+
+//console.log("finished learning. Started testing:");
+total = 10000;
+let successful = 0;
+for (let i = 0; i < 10000; i++) {
+    let x = Math.random() * 20 - 10; // random от 0 до 1 => от -10 до 10
+    let result = runAll(x);
+    let realValue = modeling(x);
+    if (Math.abs(result - realValue) <= eps) {
+        successful++;
+    }
+}
+console.log("Testing. Procent of success is " + (100 * successful / total));
 
 // mistakes.forEach(mistake => console.log(mistake.toString().replace('.', ',')));
