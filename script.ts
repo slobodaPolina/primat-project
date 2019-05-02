@@ -33,7 +33,7 @@ for(let i = 0; i < length; i++) {
     }
 }
 
-var n = 1; // скорость обучения, нужно подбирать
+var n = 0.1; // скорость обучения, нужно подбирать
 
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
@@ -144,67 +144,77 @@ function arrSquare(real : number[], expecting : number[]) {
         return sum/real.length;
     }
 }
+
+function printForExcel(el : number) {
+    console.log(el.toString().replace(".", ","));
+}
 // ---------------------------------------------------------------------------------------------
 
-let eps = 0.1;
-let epohs = 100;
-let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
-let training_loss = [];
+let eps = 0.01;
+let LEARNING = false;
 
-for (let i = 0; i < epohs; i++) {
-    data.forEach(s => {
-        let x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
-        let outputs = runAll(x);
-        let result = outputs[length - 1];
-        let realValue = modeling(x);
-        if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
-            changeWeights(x, outputs);
+if (LEARNING) {
+    let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
+    let training_loss = [];
+    let previous_sq : number;
+
+    do {
+        data.forEach(s => {
+            let x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
+            let outputs = runAll(x);
+            let result = outputs[length - 1];
+            let realValue = modeling(x);
+            if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
+                changeWeights(x, outputs);
+            }
+        });
+        // теперь для поправленных весов смотрим на вывод
+        let predictions = [];
+        let correct = [];
+        data.forEach(s => {
+            let x = Number(s);
+            predictions.push(renormalize(runAll(x)[length - 1]));
+            correct.push(abs_modeling(x));
+        });
+        previous_sq = arrSquare(predictions, correct);
+        training_loss.push(previous_sq);
+        printForExcel(previous_sq);
+    } while (previous_sq > 15);
+
+    var file = fs.createWriteStream('weights.txt');
+    for(let i = 0; i < length; i++) {
+        for(let j = 0; j < length; j++) {
+            file.write(links[i][j] + ' ');
         }
-    });
-    // теперь для поправленных весов смотрим на вывод
-    let predictions = [];
-    let correct = [];
-    data.forEach(s => {
-        let x = Number(s);
-        predictions.push(runAll(x)[length - 1]);
-        correct.push(modeling(x));
-    });
-    training_loss.push(arrSquare(predictions, correct));
-};
-
-training_loss.forEach(el => console.log(el.toString().replace(".", ",")));
-
-/*let total = 50000;
-for (let i = 0; i < total; i++) {
-    if (i % (total / 100)  == 0) {
-        console.log("learning " + ((i * 100) / total) + "% done");
+        file.write('\n');
     }
-    let x = Math.random() * 20 - 10;
-    let result = runAll(x);
-    let realValue = modeling(x);
-    if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
-        //console.log("function of " + x + " returned " + renormalize(result));
-        //console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
-        //mistakes.push(Math.abs(result - realValue));
-        changeWeights(x);
-    } else {
-        //console.log("OK");
+    file.end();
+    console.log("FINISHED LEARNING!");
+} else {
+    var text = fs.readFileSync('weights.txt', "utf-8");
+    let lines = text.split('\n');
+    let strings = Array(length);
+    for (let i = 0; i < length; i++) {
+        strings[i] = lines[i].split(" ");
     }
-    //console.log("-----------------------------------");
-};
-
-//console.log("finished learning. Started testing:");
-total = 10000;
-let successful = 0;
-for (let i = 0; i < 10000; i++) {
-    let x = Math.random() * 20 - 10; // random от 0 до 1 => от -10 до 10
-    let result = runAll(x);
-    let realValue = modeling(x);
-    if (Math.abs(result - realValue) <= eps) {
-        successful++;
+    for(let i = 0; i < length; i++) {
+        for(let j = 0; j < length; j++){
+            links[i][j] = strings[i][j] * 1;
+            if (isNaN(links[i][j])) {
+                links[i][j] = undefined;
+            }
+        }
     }
+    console.log(links);
+    let successful = 0;
+    let total = 10000;
+    for (let i = 0; i < total; i++) {
+        let x = Math.random() * 20 - 10; // random от 0 до 1 => от -10 до 10
+        let result = runAll(x)[length - 1];
+        let realValue = modeling(x);
+        if (Math.abs(result - realValue) <= eps) {
+            successful++;
+        }
+    }
+    console.log("Testing. Procent of success is " + (100 * successful / total));
 }
-console.log("Testing. Procent of success is " + (100 * successful / total));
-*/
-
-// mistakes.forEach(mistake => console.log(mistake.toString().replace('.', ',')));
