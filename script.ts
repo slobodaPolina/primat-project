@@ -20,7 +20,7 @@ function modeling(x : number) { // идеальная активация ней�
 // получится 10 весов на скрытый слой
 // + 10 * 10 весов на второй + 10 на финальный (внешний)
 
-var NODES = 20; // количество вершин во внутреннем слое
+var NODES = 10; // количество вершин во внутреннем слое
 var length = NODES + 2; // всего вершин. Начальная, конечная и 2 слоя между ними по NODES
 var links = Array(length); // двумерный массив связей между нейронами
 // изначально заполним весы нулями
@@ -38,19 +38,15 @@ var n = 1; // скорость обучения, нужно подбирать
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
         1 :
-        NodeNumber > 0 && NodeNumber <= NODES ?
-            2 : 3;
+        NodeNumber > 0 && NodeNumber <= NODES ? 2 : 3;
 }
 
 // ------------------------------------------------------------------------------------------------------------
 
 // меняет веса и n на каждом этапе обучения
-function changeWeights (x : number) {
+function changeWeights (x : number, outputs : number[]) {
     let deltas = Array(length);
-    for(let i = 0; i < length; i++) {
-        deltas[i] = Array(length);
-    }
-    let result = runAll(x);
+    let result = outputs[length - 1];
     let error = modeling(x) - result;
     deltas[length - 1] = activationDerivate(result) * error; // насколько изменить выходной результат
     //console.log(result);
@@ -60,8 +56,8 @@ function changeWeights (x : number) {
     // обработаем 2 слой
     for(let i = 1; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
-            error = activationDerivate(externalNode(run12(x))) * links[i][length - 1];
-            deltas[i] = activationDerivate(secondNode(firstNode(x), i)) * error;
+            error = activationDerivate(result) * links[i][length - 1];
+            deltas[i] = activationDerivate(outputs[i]) * error;
         } else {
             console.error("NO WEIGHT BUT HAS TO BE");
         }
@@ -69,12 +65,12 @@ function changeWeights (x : number) {
 
     // обновляем веса между 2 и 3
     for(let i = 1; i < length - 1; i++) {
-        links[i][length - 1] += n * deltas[length - 1] * secondNode(firstNode(x), i);
+        links[i][length - 1] += n * deltas[length - 1] * outputs[i];
     }
 
     // между 1 и 2
     for(let i = 1; i < NODES + 1; i++) {
-        links[0][i] += + n * deltas[i] * firstNode(x);
+        links[0][i] += + n * deltas[i] * outputs[0];
     }
 }
 
@@ -84,8 +80,7 @@ function changeWeights (x : number) {
 var activation = (x : number) => 1 / (1 + Math.pow(Math.E, -x)); // сигмоида
 
 // производная функции активации
-var activationDerivate = (x : number) =>
-        Math.pow(Math.E, -x) / Math.pow(Math.pow(Math.E, -x) + 1, 2);
+var activationDerivate = (x : number) => activation(x) * (1 - activation(x));
 
 // x - число, подаваемое сети на вход. Нормализуем его.
 // границы х от -10 до +10 => от 0 до 1
@@ -103,35 +98,38 @@ function secondNode(x : number, NodeNumber : number) {
 }
 
 // an external node (final one). Returns the prediction
-function externalNode(results : number[]) {
+function externalNode(outputs : number[]) {
     var sum = 0;
-    results.forEach(
-        (result, index) => {
-            if (links[1 + index][length - 1] == undefined) {
+    outputs.forEach(
+        (output, index) => {
+            if (getLayerOfNode(index) != 2) { // выбираем только 2 слой
+                return;
+            }
+            if (links[index][length - 1] == undefined) {
                 console.error("WEIGHT IS UNDEFINED BUT SHOULDNOT");
             }
             // аналогично перебираем 2 слой,
             // домножаем на веса из вершины 2 слоя в последнюю (вершину 3 слоя)
-            sum += result * links[1 + index][length - 1];
+            sum += output * links[index][length - 1];
         }
     );
-    return activation(sum);
+    outputs[length - 1] = activation(sum);
+    return outputs;
 }
 
-function run12 (x : number) { // запустить 1 и 2 слой сети
-    let frt = firstNode(x);
-    let seconds = [];
+function run12 (x : number, outputs : number[]) { // запустить 1 и 2 слой сети
+    outputs[0] = firstNode(x);
     for(let i = 1; i < NODES + 1; i++) {
-        seconds.push(secondNode(frt, i));
+        outputs[i] = secondNode(outputs[0], i);
     }
-    return seconds;
+    return outputs;
 }
 
 // запустить все слои (запустить сеть)
 function runAll(x : number) {
-    let seconds = run12(x);
-    let result = externalNode(seconds);
-    return result;
+    let outputs = Array(length);
+    outputs = run12(x, outputs);
+    return externalNode(outputs);
 }
 
 //let mistakes = []; // ошибки возбужденности
@@ -140,13 +138,14 @@ let eps = 0.1;
 
 for (let i = 0; i < 10; i++) {
     let x = 0;
-    let result = runAll(x);
+    let outputs = runAll(x);
+    let result = outputs[length - 1];
     let realValue = modeling(x);
     if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
         console.log("function of " + x + " returned " + renormalize(result));
         console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
         //mistakes.push(Math.abs(result - realValue));
-        changeWeights(x);
+        changeWeights(x, outputs);
     } else {
         console.log("OK");
     }
