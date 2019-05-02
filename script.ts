@@ -47,30 +47,26 @@ function getLayerOfNode(NodeNumber : number) { // получаем номер с
 function changeWeights (x : number, outputs : number[]) {
     let deltas = Array(length);
     let result = outputs[length - 1];
-    let error = modeling(x) - result;
+    let error = result - modeling(x);
     deltas[length - 1] = activationDerivate(result) * error; // насколько изменить выходной результат
     //console.log(result);
     //console.log(activationDerivate(result));
     //console.log(deltas[length - 1]);
 
-    // обработаем 2 слой
+    // обработаем 2 слой. Распространяем ошибку
     for(let i = 1; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
-            error = activationDerivate(result) * links[i][length - 1];
+            links[i][length - 1] -= outputs[i] * deltas[length - 1] * n;
+            error = links[i][length - 1] * deltas[length - 1];
             deltas[i] = activationDerivate(outputs[i]) * error;
         } else {
             console.error("NO WEIGHT BUT HAS TO BE");
         }
     }
 
-    // обновляем веса между 2 и 3
+    // 1 слой
     for(let i = 1; i < length - 1; i++) {
-        links[i][length - 1] += n * deltas[length - 1] * outputs[i];
-    }
-
-    // между 1 и 2
-    for(let i = 1; i < NODES + 1; i++) {
-        links[0][i] += + n * deltas[i] * outputs[0];
+        links[0][i] -= outputs[0] * deltas[i];
     }
 }
 
