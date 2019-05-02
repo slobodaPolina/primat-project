@@ -47,9 +47,6 @@ function changeWeights (x : number, outputs : number[]) {
     let result = outputs[length - 1];
     let error = result - modeling(x);
     deltas[length - 1] = activationDerivate(result) * error; // насколько изменить выходной результат
-    //console.log(result);
-    //console.log(activationDerivate(result));
-    //console.log(deltas[length - 1]);
 
     // обработаем 2 слой. Распространяем ошибку
     for(let i = 2; i < length - 1; i++) {
@@ -151,9 +148,8 @@ function printForExcel(el : number) {
 }
 // ---------------------------------------------------------------------------------------------
 
-let eps = 0.1; // с какой точностью достаточно получать ответ (в величинах возбужденности)
 var n = 0.1; // скорость обучения, нужно подбирать
-var goal = 10; // на каком среднем значениии квадрата разности можно закончить (в абсолютных величинах)
+var goal = 0.1; // на каком среднем значениии квадрата разности можно закончить (в абсолютных величинах)
 let LEARNING = true;
 
 if (LEARNING) {
@@ -163,13 +159,9 @@ if (LEARNING) {
 
     do {
         data.forEach(s => {
-            let x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
+            let x = Number(s); // для каждой точки из файла
             let outputs = runAll(x);
-            let result = outputs[length - 1];
-            let realValue = modeling(x);
-            if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
-                changeWeights(x, outputs);
-            }
+            changeWeights(x, outputs);
         });
         // теперь для поправленных весов смотрим на вывод
         let predictions = [];
@@ -211,6 +203,7 @@ if (LEARNING) {
     console.log(links);
     let successful = 0;
     let total = 10000;
+    let eps = 0.01; // с какой точностью достаточно получать ответ (в величинах возбужденности)
     for (let i = 0; i < total; i++) {
         let x = Math.random() * 20 - 10; // random от 0 до 1 => от -10 до 10
         let result = runAll(x)[length - 1];
