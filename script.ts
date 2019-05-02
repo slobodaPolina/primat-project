@@ -172,7 +172,7 @@ for (let i = 0; i < epohs; i++) {
     training_loss.push(arrSquare(predictions, correct));
 };
 
-console.log(training_loss);
+training_loss.forEach(el => console.log(el.toString().replace(".", ",")));
 
 /*let total = 50000;
 for (let i = 0; i < total; i++) {
