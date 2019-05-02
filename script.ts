@@ -128,25 +128,51 @@ function runAll(x : number) {
     return externalNode(outputs);
 }
 
-//let mistakes = []; // ошибки возбужденности
-let eps = 0.1;
-// let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
+function square(real : number, expecting : number) {
+    return Math.pow(real - expecting, 2);
+}
 
-for (let i = 0; i < 10; i++) {
-    let x = 0;
-    let outputs = runAll(x);
-    let result = outputs[length - 1];
-    let realValue = modeling(x);
-    if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
-        console.log("function of " + x + " returned " + renormalize(result));
-        console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
-        //mistakes.push(Math.abs(result - realValue));
-        changeWeights(x, outputs);
+// получить среднее квадратическое отклонение по массивам
+function arrSquare(real : number[], expecting : number[]) {
+    if(real.length != expecting.length) {
+        console.error("LENGTHS ARE DIFFERENT!");
     } else {
-        console.log("OK");
+        let sum = 0;
+        real.forEach((el, index) => {
+            sum += square(el, expecting[index]);
+        });
+        return sum/real.length;
     }
-    //console.log("-----------------------------------");
+}
+// ---------------------------------------------------------------------------------------------
+
+let eps = 0.1;
+let epohs = 100;
+let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
+let training_loss = [];
+
+for (let i = 0; i < epohs; i++) {
+    data.forEach(s => {
+        let x = Number(s); // для каждой точки из файла запускаем и корректируем, если нужно
+        let outputs = runAll(x);
+        let result = outputs[length - 1];
+        let realValue = modeling(x);
+        if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
+            changeWeights(x, outputs);
+        }
+    });
+    // теперь для поправленных весов смотрим на вывод
+    let predictions = [];
+    let correct = [];
+    data.forEach(s => {
+        let x = Number(s);
+        predictions.push(runAll(x)[length - 1]);
+        correct.push(modeling(x));
+    });
+    training_loss.push(arrSquare(predictions, correct));
 };
+
+console.log(training_loss);
 
 /*let total = 50000;
 for (let i = 0; i < total; i++) {
