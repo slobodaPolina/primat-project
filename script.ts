@@ -21,7 +21,7 @@ function modeling(x : number) { // идеальная активация ней�
 // + 10 * 10 весов на второй + 10 на финальный (внешний)
 
 var NODES = 10; // количество вершин во внутреннем слое
-var length = NODES + 2; // всего вершин. Начальная, конечная и 2 слоя между ними по NODES
+var length = NODES + 3; // всего вершин. Начальная, смещение, конечная и NODES
 var links = Array(length); // двумерный массив связей между нейронами
 // изначально заполним весы нулями
 for(let i = 0; i < length; i++) {
@@ -34,9 +34,9 @@ for(let i = 0; i < length; i++) {
 }
 
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
-    return NodeNumber === 0 ?
+    return NodeNumber < 2 ?
         1 :
-        NodeNumber > 0 && NodeNumber <= NODES ? 2 : 3;
+        NodeNumber > 1 && NodeNumber < length - 1 ? 2 : 3;
 }
 
 // ------------------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ function changeWeights (x : number, outputs : number[]) {
     //console.log(deltas[length - 1]);
 
     // обработаем 2 слой. Распространяем ошибку
-    for(let i = 1; i < length - 1; i++) {
+    for(let i = 2; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
             links[i][length - 1] -= outputs[i] * deltas[length - 1] * n;
             error = links[i][length - 1] * deltas[length - 1];
@@ -63,8 +63,9 @@ function changeWeights (x : number, outputs : number[]) {
     }
 
     // 1 слой
-    for(let i = 1; i < length - 1; i++) {
+    for(let i = 2; i < length - 1; i++) {
         links[0][i] -= outputs[0] * deltas[i];
+        links[1][i] -= outputs[1] * deltas[i];
     }
 }
 
@@ -81,14 +82,15 @@ var activationDerivate = (x : number) => activation(x) * (1 - activation(x));
 var firstNode = (x : number) => activation((x + 10.0) / 20.0);
 
 // NodeNumber - номер вершины среди всех вершинок. х - выход первого слоя
-function secondNode(x : number, NodeNumber : number) {
+function secondNode(x : number[], NodeNumber : number) {
     if (getLayerOfNode(NodeNumber) !== 2) { // на всякий случай
         console.error("GOT NODE NOT OF 2 LAYER");
+        console.log(NodeNumber);
     }
-    if (links[0][NodeNumber] == undefined) {
+    if (links[0][NodeNumber] == undefined || links[1][NodeNumber] == undefined) {
         console.error("WEIGHT IS UNDEFINED BUT SHOULDNOT");
     }
-    return activation(links[0][NodeNumber] * x);
+    return activation(links[0][NodeNumber] * x[0] + links[1][NodeNumber] * x[1]);
 }
 
 // an external node (final one). Returns the prediction
@@ -113,8 +115,9 @@ function externalNode(outputs : number[]) {
 
 function run12 (x : number, outputs : number[]) { // запустить 1 и 2 слой сети
     outputs[0] = firstNode(x);
-    for(let i = 1; i < NODES + 1; i++) {
-        outputs[i] = secondNode(outputs[0], i);
+    outputs[1] = activation(1);
+    for(let i = 2; i < length - 1; i++) {
+        outputs[i] = secondNode([outputs[0], outputs[1]], i);
     }
     return outputs;
 }

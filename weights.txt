@@ -1,12 +1,13 @@
-undefined -0.6808750837813494 0.40707853244396075 0.38613833726880803 -0.8483301714621481 0.14069177549747378 -0.8013934209786913 -0.2900009939038641 -0.3253409278332601 -0.952044663644887 0.2748343766878314 undefined 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -0.18242604028811144 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.3253082046512932 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.05701561487807896 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -0.4304364991620205 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.308792198955056 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -0.49026173167695986 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.1965369166603279 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.05031446759260413 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -0.6288647291515976 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.17053642125203253 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 
+undefined undefined -14.136244218225452 -9.150439173862093 -12.215834161513312 -13.951304107666378 9.845537025842784 1.3985912134420926 -0.7786149262243766 2.937030776083773 -6.902819473358098 -2.2080277438238873 undefined 
+undefined undefined 6.244223033577995 3.821822602617373 5.594252106223612 6.106152573562354 -8.76203202740103 -0.15496542109648542 1.139790206480313 -1.25643969708511 3.24570195598761 2.1427376930120143 undefined 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -2.8752490461817946 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -2.544655850942459 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -3.099848491786985 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -2.838098027455593 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 3.5189136240483636 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.04363460187528373 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -0.744438857966739 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.5989780096685565 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -2.4785680178425062 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.2793418792564502 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 
