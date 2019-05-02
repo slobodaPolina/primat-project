@@ -15,13 +15,13 @@ function modeling(x : number) { // идеальная активация ней�
  }
 
 // выходная вершина дает ответ
-// и допустим 2 скрытых слоя по 10 нейронов.
+// и допустим 1 скрытый слой.
 // в каждый из 10 входит х, там будет вес,
-// получится 10 весов на первый скрытый слой
+// получится 10 весов на скрытый слой
 // + 10 * 10 весов на второй + 10 на финальный (внешний)
 
-var NODES = 20; // количество вершин в каждом внутреннем слое
-var length = NODES * 2 + 2; // всего вершин. Начальная, конечная и 2 слоя между ними по NODES
+var NODES = 20; // количество вершин во внутреннем слое
+var length = NODES + 2; // всего вершин. Начальная, конечная и 2 слоя между ними по NODES
 var links = Array(length); // двумерный массив связей между нейронами
 // изначально заполним весы нулями
 for(let i = 0; i < length; i++) {
@@ -33,16 +33,13 @@ for(let i = 0; i < length; i++) {
     }
 }
 
-var n = 0.1; // скорость обучения, нужно подбирать
+var n = 1; // скорость обучения, нужно подбирать
 
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
         1 :
         NodeNumber > 0 && NodeNumber <= NODES ?
-            2 :
-            NodeNumber > NODES && NodeNumber <= 2 * NODES ?
-                3 :
-                4;
+            2 : 3;
 }
 
 // ------------------------------------------------------------------------------------------------------------
@@ -60,40 +57,19 @@ function changeWeights (x : number) {
     //console.log(activationDerivate(result));
     //console.log(deltas[length - 1]);
 
-    // обработаем 3 слой
-    for(let i = 1 + NODES; i < length - 1; i++) {
+    // обработаем 2 слой
+    for(let i = 1; i < length - 1; i++) {
         if(links[i][length - 1] != undefined) {
-            deltas[i] = activationDerivate(thirdNode(run12(x), i)) *
-                            deltas[length - 1] * links[i][length - 1];
-            //console.log(deltas[i]);
+            error = activationDerivate(externalNode(run12(x))) * links[i][length - 1];
+            deltas[i] = activationDerivate(secondNode(firstNode(x), i)) * error;
         } else {
             console.error("NO WEIGHT BUT HAS TO BE");
         }
     }
 
-    // теперь 2 слой
-    for(let i = 1; i < NODES + 1; i++) {
-        error = 0;
-        for(let j = 1 + NODES; j < length - 1; j++) {
-            if(links[i][j] != undefined) {
-                error += activationDerivate(thirdNode(run12(x), j)) * links[i][j];
-            } else {
-                console.error("NO WEIGHT BUT HAS TO BE");
-            }
-        }
-        deltas[i] = activationDerivate(secondNode(firstNode(x), i)) * error;
-    }
-
-    // обновляем веса между 3 и 4
-    for(let i = 1 + NODES; i < length - 1; i++) {
-        links[i][length - 1] += n * deltas[length - 1] * thirdNode(run12(x), i);
-    }
-
-    // теперь 2 и 3
-    for(let i = 1; i < NODES + 1; i++) {
-        for(let j = 1 + NODES; j < length - 1; j++) {
-            links[i][j] += n * deltas[j] * secondNode(firstNode(x), i);
-        }
+    // обновляем веса между 2 и 3
+    for(let i = 1; i < length - 1; i++) {
+        links[i][length - 1] += n * deltas[length - 1] * secondNode(firstNode(x), i);
     }
 
     // между 1 и 2
@@ -126,36 +102,17 @@ function secondNode(x : number, NodeNumber : number) {
     return activation(links[0][NodeNumber] * x);
 }
 
-// results is an array of 10 results of the second layer
-// NodeNumber is still the number of the node in the full list
-function thirdNode(results : number[], NodeNumber : number) {
-    if (getLayerOfNode(NodeNumber) !== 3) { // на всякий случай
-        console.error("GOT NODE NOT OF 3 LAYER");
-    }
-
-    var sum = 0;
-    results.forEach( // все выходы 2 слоя домножаем на веса и суммируем
-        (result, index) => {
-            if (links[1 + index][NodeNumber] == undefined) {
-                console.error("WEIGHT IS UNDEFINED BUT SHOULDNOT");
-            }
-            sum += result * links[1 + index][NodeNumber];
-        }
-    );
-    return activation(sum);
-}
-
 // an external node (final one). Returns the prediction
 function externalNode(results : number[]) {
     var sum = 0;
     results.forEach(
         (result, index) => {
-            if (links[1 + NODES + index][length - 1] == undefined) {
+            if (links[1 + index][length - 1] == undefined) {
                 console.error("WEIGHT IS UNDEFINED BUT SHOULDNOT");
             }
-            // аналогично перебираем 3 слой,
-            // домножаем на веса из вершины 3 слоя в последнюю (вершину 4 слоя)
-            sum += result * links[1 + NODES + index][length - 1];
+            // аналогично перебираем 2 слой,
+            // домножаем на веса из вершины 2 слоя в последнюю (вершину 3 слоя)
+            sum += result * links[1 + index][length - 1];
         }
     );
     return activation(sum);
@@ -170,26 +127,33 @@ function run12 (x : number) { // запустить 1 и 2 слой сети
     return seconds;
 }
 
-function run123 (x : number) { // запуск 1, 2 и 3 слоев
-    let seconds = run12(x);
-    let thirds = [];
-    for(let i = NODES + 1; i < length - 1; i++) {
-        thirds.push(thirdNode(seconds, i));
-    }
-    return thirds;
-}
-
 // запустить все слои (запустить сеть)
 function runAll(x : number) {
-    let thirds = run123(x);
-    let result = externalNode(thirds);
+    let seconds = run12(x);
+    let result = externalNode(seconds);
     return result;
 }
 
 //let mistakes = []; // ошибки возбужденности
 let eps = 0.1;
 // let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
-let total = 50000;
+
+for (let i = 0; i < 10; i++) {
+    let x = 0;
+    let result = runAll(x);
+    let realValue = modeling(x);
+    if (Math.abs(result - realValue) > eps) { // если сеть отвечает совсем не так, как надо, обучаем
+        console.log("function of " + x + " returned " + renormalize(result));
+        console.log("mistake is " + Math.abs(renormalize(result) - abs_modeling(x)));
+        //mistakes.push(Math.abs(result - realValue));
+        changeWeights(x);
+    } else {
+        console.log("OK");
+    }
+    //console.log("-----------------------------------");
+};
+
+/*let total = 50000;
 for (let i = 0; i < total; i++) {
     if (i % (total / 100)  == 0) {
         console.log("learning " + ((i * 100) / total) + "% done");
@@ -220,5 +184,6 @@ for (let i = 0; i < 10000; i++) {
     }
 }
 console.log("Testing. Procent of success is " + (100 * successful / total));
+*/
 
 // mistakes.forEach(mistake => console.log(mistake.toString().replace('.', ',')));
