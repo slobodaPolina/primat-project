@@ -1,13 +1,15 @@
-undefined undefined -57.267273732127734 -55.5712130596636 -17.116738642179953 -65.12122085643271 -57.61713122242641 -54.622004038333 -55.165032680063156 40.64832179580027 54.78391233198547 -37.563337125503985 undefined 
-undefined undefined 34.08188672823624 31.982643924734496 13.828978029825825 40.54268076396962 34.46089911112649 32.066801648421375 34.50666800443035 -44.66587707624505 -58.93666926383136 31.116155926266426 undefined 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -9.721285069495913 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -7.620074459440427 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.14719803988208505 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -13.981779167715466 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -10.243202083173209 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -8.759912587219885 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -13.253366037051762 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 38.130986589177795 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 51.245504273890965 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -7.838007571022102 
-undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 
+undefined undefined undefined undefined -2.0689872524933737 3.474448520682816 -2.54770353573647 5.212927587504834 -1.5284316312604993 -1.7305705004663374 -1.1814462649243653 7.710861756761452 1.2913945404786507 2.1784231745922424 undefined 
+undefined undefined undefined undefined 5.578589491376696 -1.0819212391345046 6.94307873597445 -6.640710114235088 4.330412391413069 4.864724680583549 4.605691466149169 -9.90373156428742 1.1914867793300157 -0.10961750227838103 undefined 
+undefined undefined undefined undefined 1.9391284339946933 1.1385614384485618 1.9168904298586342 0.5918720452128228 1.395248359487876 1.5229008134956292 1.4755438147457187 -1.0327171275594667 1.8703475961508969 2.1037286056258986 undefined 
+undefined undefined undefined undefined 1.6830561260894834 2.0796802708588373 1.452771834088315 0.3015904222528346 1.5533254555976785 1.3600731842645875 2.0100591977138276 -0.44100218791234774 1.916375718182235 1.9512827452290213 undefined 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.3951129626499994 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.9999597976767588 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.618484969761213 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 4.855522393283806 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.3364297768156586 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.474712038255551 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined -1.0615117519877753 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 7.416752325759483 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.07186590087380974 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 0.4925417011380438 
+undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined 
