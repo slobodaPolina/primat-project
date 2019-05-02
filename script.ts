@@ -33,8 +33,6 @@ for(let i = 0; i < length; i++) {
     }
 }
 
-var n = 0.1; // скорость обучения, нужно подбирать
-
 function getLayerOfNode(NodeNumber : number) { // получаем номер слоя, к которому принадлежит вершина
     return NodeNumber === 0 ?
         1 :
@@ -150,8 +148,10 @@ function printForExcel(el : number) {
 }
 // ---------------------------------------------------------------------------------------------
 
-let eps = 0.01;
-let LEARNING = false;
+let eps = 0.1; // с какой точностью достаточно получать ответ (в величинах возбужденности)
+var n = 0.1; // скорость обучения, нужно подбирать
+var goal = 10; // на каком среднем значениии квадрата разности можно закончить (в абсолютных величинах)
+let LEARNING = true;
 
 if (LEARNING) {
     let data = fs.readFileSync('data.txt', { encoding: 'utf-8' }).split('\n');
@@ -179,7 +179,7 @@ if (LEARNING) {
         previous_sq = arrSquare(predictions, correct);
         training_loss.push(previous_sq);
         printForExcel(previous_sq);
-    } while (previous_sq > 15);
+    } while (previous_sq > goal);
 
     var file = fs.createWriteStream('weights.txt');
     for(let i = 0; i < length; i++) {
